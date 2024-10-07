@@ -1,6 +1,14 @@
 // src/leaderboard/schemas/leaderboard.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { TimeFrame } from 'src/chart/schemas/chart.schema';
+
+export enum Fees {
+  MANAGEMENT_FEES = 'Management Fees',
+  PERFORMANCE_FEES = 'Performance Fees',
+  ENTRY_FEES = 'Entry Fees',
+  EXIT_FEES = 'Exit Fees',
+}
 
 @Schema()
 export class Leaderboard extends Document {
@@ -19,7 +27,13 @@ export class Leaderboard extends Document {
   @Prop({ required: true })
   address: string;
 
-  @Prop({ type: [String], required: true })
+  @Prop({
+    type: Array<{
+      name: string;
+      allocation: string;
+    }>,
+    required: true,
+  })
   coins: string[];
 
   @Prop({ required: true })
@@ -30,12 +44,6 @@ export class Leaderboard extends Document {
 
   @Prop({ required: true })
   change: string;
-
-  @Prop({ type: Object, required: true })
-  chartData: {
-    id: string;
-    data: { x: string; y: number }[];
-  }[];
 }
 
 export const LeaderboardSchema = SchemaFactory.createForClass(Leaderboard);

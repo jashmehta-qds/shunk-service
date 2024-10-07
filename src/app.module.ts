@@ -3,6 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TokensModule } from './tokens/tokens.module';
+import { ChartModule } from './chart/chart.module.';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { BagModule } from './bag/bag.module';
 
 @Module({
   imports: [
@@ -18,7 +21,9 @@ import { TokensModule } from './tokens/tokens.module';
     }),
     ScheduleModule.forRoot(),
     TokensModule,
+    ChartModule,
+    LeaderboardModule,
+    BagModule,
   ],
 })
 export class AppModule {}
-

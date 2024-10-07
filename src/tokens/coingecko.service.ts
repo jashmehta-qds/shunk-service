@@ -44,8 +44,8 @@ export interface CgMarketResponse {
   };
   last_updated: string; // ISO date string
   sparkline_in_7d: {
-    price: number[]
-  }
+    price: number[];
+  };
 }
 @Injectable()
 export class CoingeckoService {
@@ -65,7 +65,7 @@ export class CoingeckoService {
   ) {}
 
   async onModuleInit() {
-    await this.fetchTokenPlatforms();
+    // await this.fetchTokenPlatforms();
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES) // Runs daily at midnight

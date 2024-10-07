@@ -4,8 +4,8 @@ import { HypersyncService } from 'src/contracts/hypersync/hypersync.service';
 import { CoingeckoService } from './coingecko.service';
 import { TokensData, TokensDataScheme } from './schemas/token-price.scheme';
 import {
-    UniswapData,
-    UniswapDataSchema,
+  UniswapData,
+  UniswapDataSchema,
 } from './schemas/uniswap-subgraph.schema';
 import { TokensController } from './tokens.controller';
 import { UniswapService } from './uniswap-subgraph.service';

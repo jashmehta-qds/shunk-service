@@ -7,8 +7,8 @@ import fetch from 'cross-fetch';
 import { Model } from 'mongoose';
 
 import {
-    UniswapData,
-    UniswapDataDocument,
+  UniswapData,
+  UniswapDataDocument,
 } from './schemas/uniswap-subgraph.schema';
 
 @Injectable()
@@ -32,10 +32,10 @@ export class UniswapService {
     });
   }
 
-//   async onModuleInit() {
-//     // Trigger fetchData method on module initialization
-//     await this.fetchData();
-//   }
+  async onModuleInit() {
+    // Trigger fetchData method on module initialization
+    await this.fetchData();
+  }
 
   @Cron(CronExpression.EVERY_YEAR) // Run every hour
   async fetchData() {

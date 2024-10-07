@@ -13,9 +13,6 @@ export enum TimeFrame {
 @Schema()
 export class ChartData extends Document {
   @Prop({ required: true })
-  id: number;
-
-  @Prop({ required: true })
   tradeCurrency: string;
 
   @Prop({ required: true })

@@ -25,29 +25,35 @@ export class LeaderboardService {
         name: `Fund ${i}`,
         code: `FND${i}`,
         address: `0x${Math.random().toString(16).substr(2, 40)}`,
-        coins: ['wsteth', 'usdc', 'prime', 'mog'],
+        coins: [
+          {
+            name: 'wsteth',
+            allocation: Math.ceil(Math.random() * 10),
+          },
+          {
+            name: 'usdc',
+            allocation: Math.ceil(Math.random() * 10),
+          },
+          {
+            name: 'prime',
+            allocation: Math.ceil(Math.random() * 10),
+          },
+          {
+            name: 'mog',
+            allocation: Math.ceil(Math.random() * 10),
+          },
+        ],
         aum: `$${(Math.random() * 10).toFixed(2)}m`,
         price: (Math.random() * 2000).toFixed(2),
         change: (Math.random() * 100 - 50).toFixed(2),
-        chartData: [
-          {
-            id: '',
-            color: 'hsl(154, 70%, 80%)',
-            data: Array.from({ length: 12 }, (_, i) => ({
-              x: `${i + 1} Feb`,
-              y: Math.floor(Math.random() * 1000) + 100,
-            })),
-          },
-        ],
       });
     }
     return data;
   }
 
-  async getLeaderboard(): Promise<Leaderboard[]> {
+  async getLeaderboard(): Promise<Omit<Leaderboard, 'chartData'>[]> {
     return this.leaderboardData;
   }
-
   async getBag(id: number): Promise<Leaderboard | undefined> {
     return this.leaderboardData.find((item) => item.id === id);
   }
