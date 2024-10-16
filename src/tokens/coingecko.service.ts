@@ -62,12 +62,12 @@ export class CoingeckoService {
     await this.fetchTokenPlatforms();
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async fetchTokenPlatforms() {
     try {
       const key = this.configService.get<string>('CG_KEY');
       const perPage = 250;
-      const totalPages = 3;
+      const totalPages = 6;
 
       const marketData = await this.fetchMarketData(totalPages, perPage, key);
       const platformData = await this.fetchPlatformData();
