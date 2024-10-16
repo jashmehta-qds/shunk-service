@@ -5,6 +5,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { Model } from 'mongoose';
 import { TokensData, TokensDocument } from './schemas/token-price.scheme';
+
 interface CgPlatformResponse {
   id: string;
   symbol: string;
@@ -30,89 +31,72 @@ export interface CgMarketResponse {
   market_cap_change_percentage_24h: number;
   circulating_supply: number;
   total_supply: number;
-  max_supply: number | null; // `null` if no max supply
+  max_supply: number | null;
   ath: number;
   ath_change_percentage: number;
-  ath_date: string; // ISO date string
+  ath_date: string;
   atl: number;
   atl_change_percentage: number;
-  atl_date: string; // ISO date string
+  atl_date: string;
   roi: {
     times: number;
     currency: string;
     percentage: number;
   };
-  last_updated: string; // ISO date string
-  sparkline_in_7d: {
-    price: number[];
-  };
+  last_updated: string;
+  sparkline_in_7d: { price: number[] };
 }
+
 @Injectable()
 export class CoingeckoService {
   private readonly logger = new Logger(CoingeckoService.name);
-  private readonly apiUrl =
-    'https://api.coingecko.com/api/v3/coins/list?include_platform=true';
-
-  private readonly apiUrl2 =
-    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&sparkline=true';
-
-  private readonly apiUrlpage2 =
-    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=true';
+  private readonly apiUrl = 'https://api.coingecko.com/api/v3/coins/list?include_platform=true';
+  private readonly apiMarketsUrl = 'https://api.coingecko.com/api/v3/coins/markets';
+  
   constructor(
     private readonly configService: ConfigService,
-    @InjectModel(TokensData.name)
-    private readonly tokenPriceModel: Model<TokensDocument>,
+    @InjectModel(TokensData.name) private readonly tokenPriceModel: Model<TokensDocument>,
   ) {}
 
   async onModuleInit() {
-    // await this.fetchTokenPlatforms();
+    await this.fetchTokenPlatforms();
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES) // Runs daily at midnight
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async fetchTokenPlatforms() {
     try {
       const key = this.configService.get<string>('CG_KEY');
-      const response_market = [];
-      const res1 = await axios.get<CgMarketResponse[]>(this.apiUrl2, {
-        headers: { 'x-cg-demo-api-key': key },
-      });
-      const res2 = await axios.get<CgMarketResponse[]>(this.apiUrlpage2, {
-        headers: { 'x-cg-demo-api-key': key },
-      });
-      response_market.push(...res1.data);
-      response_market.push(...res2.data);
+      const perPage = 250;
+      const totalPages = 3;
 
-      const response_platform = await axios.get<CgPlatformResponse[]>(
-        this.apiUrl,
-      );
+      const marketData = await this.fetchMarketData(totalPages, perPage, key);
+      const platformData = await this.fetchPlatformData();
 
-      const mergedData = response_market?.map((res) => {
-        return {
-          ...res,
-          ...response_platform.data.find((p) => p.id === res.id),
-        };
-      });
+      const mergedData = marketData.map((market) => ({
+        ...market,
+        platforms: platformData.find((p) => p.id === market.id)?.platforms || {},
+      }));
+
       await this.tokenPriceModel.deleteMany();
 
-      const res = mergedData.map(
-        (data) =>
-          new this.tokenPriceModel({
-            id: data.id,
-            name: data.name,
-            symbol: data.symbol,
-            priceUSD: data.current_price,
-            platforms: data.platforms,
-            icon: data.image,
-            marketCap: data.market_cap,
-            percentChange: data.price_change_percentage_24h,
-            priceChange: data.price_change_24h,
-            tvl: data.total_volume,
-            sparkline_price_in_7d: data.sparkline_in_7d?.price ?? [],
-            fetchedAt: new Date().getTime(),
-          }),
+      const documents = mergedData.map((data) => 
+        new this.tokenPriceModel({
+          id: data.id,
+          name: data.name,
+          symbol: data.symbol,
+          priceUSD: data.current_price,
+          platforms: data.platforms,
+          icon: data.image,
+          marketCap: data.market_cap,
+          percentChange: data.price_change_percentage_24h,
+          priceChange: data.price_change_24h,
+          tvl: data.total_volume,
+          sparkline_price_in_7d: data.sparkline_in_7d?.price ?? [],
+          fetchedAt: new Date().getTime(),
+        })
       );
-      await this.tokenPriceModel.insertMany(res);
 
+      await this.tokenPriceModel.insertMany(documents);
       this.logger.log('Token prices updated successfully');
     } catch (error) {
       this.logger.error('Error fetching token prices', error);
@@ -120,14 +104,26 @@ export class CoingeckoService {
     }
   }
 
+  private async fetchMarketData(totalPages: number, perPage: number, key: string) {
+    const requests = Array.from({ length: totalPages }, (_, i) => 
+      axios.get<CgMarketResponse[]>(
+        `${this.apiMarketsUrl}?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=${i + 1}&sparkline=true`,
+        { headers: { 'x-cg-demo-api-key': key } }
+      )
+    );
+
+    const responses = await Promise.all(requests);
+    return responses.flatMap((res) => res.data);
+  }
+
+  private async fetchPlatformData() {
+    const response = await axios.get<CgPlatformResponse[]>(this.apiUrl);
+    return response.data;
+  }
+
   async getAllData() {
     return this.tokenPriceModel
-      .find({
-        $or: [
-          //   { 'platforms.ethereum': { $exists: true, $ne: null } },
-          { 'platforms.base': { $exists: true, $ne: null } },
-        ],
-      })
+      .find({ 'platforms.base': { $exists: true, $ne: null } })
       .exec();
   }
 }
