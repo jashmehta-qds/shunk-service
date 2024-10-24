@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type BagDocument = BagDetails & Document;
+export type BagDetailsDocument = BagDetails & Document;
 
 interface TokenAllocation {
   tokenAddresses: string[];

@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Interface } from 'ethers';
 import { Model } from 'mongoose';
-import { BagDetails, BagDocument } from 'src/bag/schemas/bag.schema';
+import { BagDetails, BagDetailsDocument } from 'src/bag/schemas/bag.schema';
 import { ShunkFactoryABI } from '../../contracts/abi/shunkfactory';
 
 @Injectable()
@@ -17,14 +17,14 @@ export class HypersyncService {
 
   constructor(
     @InjectModel(BagDetails.name)
-    private readonly bagDetailsModel: Model<BagDocument>,
+    private readonly bagDetailsModel: Model<BagDetailsDocument>,
   ) {}
 
   async onModuleInit() {
-    await this.getContractData(); // Trigger on module initialization
+    await this.getContractData();
   }
 
-  @Cron(CronExpression.EVERY_HOUR) // Adjusted to run every hour
+  @Cron(CronExpression.EVERY_HOUR)
   async getContractData() {
     this.logger.log('Query started');
 
@@ -72,15 +72,13 @@ export class HypersyncService {
   }
 
   private async storeDecodedLog(decodedLog: any) {
-    console.log(':::::::Token Allocation: ', decodedLog.args[4].length);
-    const tokenAddresses = decodedLog.args[4][0]?.filter(
+    const tokenAddresses = decodedLog.args[4]?.[0]?.filter(
       (res, idx) => (idx + 1) % 2 > 0,
     );
 
-    const allocation = decodedLog.args[4][0]?.filter(
+    const allocation = decodedLog.args[4]?.[0]?.filter(
       (res, idx) => (idx + 1) % 2 === 0,
     );
-    console.log(':::::::Token Allocation: ', tokenAddresses, allocation);
 
     const bagDetails = new this.bagDetailsModel({
       creator: decodedLog.args[0],
@@ -91,7 +89,7 @@ export class HypersyncService {
         {
           tokenAddresses,
           allocation,
-          timestamp : new Date().getTime(),
+          timestamp: new Date().getTime(),
         },
       ],
     });
