@@ -58,9 +58,9 @@ export class CoingeckoService {
     @InjectModel(TokensData.name) private readonly tokenPriceModel: Model<TokensDocument>,
   ) {}
 
-  async onModuleInit() {
-    await this.fetchTokenPlatforms();
-  }
+  // async onModuleInit() {
+  //   await this.fetchTokenPlatforms();
+  // }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async fetchTokenPlatforms() {

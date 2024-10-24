@@ -9,6 +9,7 @@ export enum Fees {
   ENTRY_FEES = 'Entry Fees',
   EXIT_FEES = 'Exit Fees',
 }
+export type BagDocument = Bag & Document;
 
 @Schema()
 export class Bag extends Leaderboard {
