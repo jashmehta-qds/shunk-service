@@ -4,10 +4,17 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BagController } from './bag.controller';
 import { BagService } from './bag.service';
 import { Bag, BagSchema } from './schemas/bag';
+import { BagDetails, BagDetailsSchema } from './schemas/bag.schema';
+import { HypersyncService } from './service/hypersync';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Bag.name, schema: BagSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Bag.name, schema: BagSchema },
+      { name: BagDetails.name, schema: BagDetailsSchema },
+    ]),
+  ],
   controllers: [BagController],
-  providers: [BagService],
+  providers: [BagService, HypersyncService],
 })
 export class BagModule {}
