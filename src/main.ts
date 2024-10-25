@@ -12,11 +12,15 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('api')
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   app.enableCors({
-    origin: ['http://localhost:3000' , "https://app.shunk.io"], // Allow requests from this origin
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://app.shunk.io',
+    ], // Allow requests from this origin
   });
   await app.listen(3000);
 }

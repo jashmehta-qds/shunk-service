@@ -1,6 +1,6 @@
 import {
-    HypersyncClient,
-    presetQueryLogsOfEvent,
+  HypersyncClient,
+  presetQueryLogsOfEvent,
 } from '@envio-dev/hypersync-client';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
