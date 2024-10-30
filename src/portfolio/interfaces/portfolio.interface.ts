@@ -4,7 +4,7 @@ export interface Portfolio {
   id: number;
   bagIcon: string;
   bagName: string;
-  bagCode: string;
+  bagSymbol: string;
   totalInvested: number;
   currentValue: number;
   returnValue: number;

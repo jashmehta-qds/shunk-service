@@ -16,7 +16,7 @@ export class Portfolio {
   bagName: string;
 
   @Prop({ required: true })
-  bagCode: string;
+  bagSymbol: string;
 
   @Prop({ required: true })
   totalInvested: number;
