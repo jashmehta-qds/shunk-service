@@ -6,6 +6,7 @@ import { TokensModule } from './tokens/tokens.module';
 import { ChartModule } from './chart/chart.module.';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { BagModule } from './bag/bag.module';
+import { PortfolioModule } from './portfolio/portfolio.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { BagModule } from './bag/bag.module';
     ChartModule,
     LeaderboardModule,
     BagModule,
+    PortfolioModule,
   ],
 })
 export class AppModule {}
