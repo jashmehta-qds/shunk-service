@@ -1,6 +1,7 @@
 // src/leaderboard/leaderboard.module.ts
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CacheManagerService } from 'src/shared/cache-manager.service';
 import { BagController } from './bag.controller';
 import { BagService } from './bag.service';
 import { Bag, BagSchema } from './schemas/bag';
@@ -15,6 +16,6 @@ import { HypersyncService } from './service/hypersync';
     ]),
   ],
   controllers: [BagController],
-  providers: [BagService, HypersyncService],
+  providers: [BagService, HypersyncService, CacheManagerService],
 })
 export class BagModule {}

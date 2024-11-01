@@ -8,8 +8,11 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Interface } from 'ethers';
 import { Model } from 'mongoose';
 import { BagDetails, BagDetailsDocument } from 'src/bag/schemas/bag.schema';
+import {
+  CACHE_KEYS,
+  CacheManagerService,
+} from 'src/shared/cache-manager.service';
 import { ShunkFactoryABI } from '../../contracts/abi/shunkfactory';
-
 @Injectable()
 export class HypersyncService {
   private readonly logger = new Logger(HypersyncService.name);
@@ -18,13 +21,14 @@ export class HypersyncService {
   constructor(
     @InjectModel(BagDetails.name)
     private readonly bagDetailsModel: Model<BagDetailsDocument>,
+    private readonly cacheManagerService: CacheManagerService,
   ) {}
 
   async onModuleInit() {
     await this.getContractData();
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_WEEK)
   async getContractData() {
     this.logger.log('Query started');
 
@@ -36,23 +40,27 @@ export class HypersyncService {
     const eventTopic0 =
       '0x20078448f506530c56be7525b48b80354771a5f65e3814cc030138438319ba27';
 
+    const lastHeight = Number(
+      await this.cacheManagerService.get(CACHE_KEYS.BAG_SYNC_BLOCK_COUNT),
+    );
+
+    this.logger.log('last height:::     ' + lastHeight);
     let query = presetQueryLogsOfEvent(
       contractAddress,
       eventTopic0,
-      17_000_000,
+      lastHeight,
     );
 
     this.logger.log('Running the query...');
 
     const res = await client.get(query);
-
+    let block_number = lastHeight;
     for (const log of res.data.logs) {
       try {
         const decodedLog = this.decodeLog(log);
+        block_number = log.blockNumber;
         await this.storeDecodedLog(decodedLog);
-        this.logger.log(
-          `Decoded and stored event: ${JSON.stringify(decodedLog)}`,
-        );
+        this.logger.log(`Decoded and stored event: ${decodedLog.args}`);
       } catch (error) {
         this.logger.error(
           `Error processing log: ${error.message}`,
@@ -60,6 +68,10 @@ export class HypersyncService {
         );
       }
     }
+    await this.cacheManagerService.set(
+      CACHE_KEYS.BAG_SYNC_BLOCK_COUNT,
+      block_number,
+    );
 
     this.logger.log('Query finished.');
   }
@@ -81,9 +93,10 @@ export class HypersyncService {
     );
 
     const bagDetails = new this.bagDetailsModel({
-      creator: decodedLog.args[0],
-      name: decodedLog.args[1],
-      symbol: decodedLog.args[2],
+      contractAddress: 'test',
+      creator: decodedLog.args[0] as string,
+      name: decodedLog.args[1] as string,
+      symbol: decodedLog.args[2] as string,
       network: 8453,
       tokenAllocation: [
         {
