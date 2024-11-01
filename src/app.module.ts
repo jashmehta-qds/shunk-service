@@ -7,6 +7,7 @@ import { BagModule } from './bag/bag.module';
 import { BundlerModule } from './bundler/bundler.module';
 import { ChartModule } from './chart/chart.module.';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { PortfolioModule } from './portfolio/portfolio.module';
 import { CacheManagerService } from './shared/cache-manager.service';
 import { TokensModule } from './tokens/tokens.module';
 
@@ -34,6 +35,7 @@ import { TokensModule } from './tokens/tokens.module';
     LeaderboardModule,
     BagModule,
     BundlerModule,
+    PortfolioModule,
   ],
   providers: [CacheManagerService],
   exports: [CacheManagerService],
