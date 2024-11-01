@@ -15,6 +15,9 @@ export class BagDetails {
   creator: string;
 
   @Prop({ required: true })
+  contractAddress: string;
+
+  @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })
