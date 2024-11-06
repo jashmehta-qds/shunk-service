@@ -30,6 +30,7 @@ export class HypersyncService {
 
   @Cron(CronExpression.EVERY_WEEK)
   async getContractData() {
+    await this.bagDetailsModel.deleteMany();
     this.logger.log('Query started');
 
     const client = HypersyncClient.new({
@@ -44,7 +45,6 @@ export class HypersyncService {
       await this.cacheManagerService.get(CACHE_KEYS.BAG_SYNC_BLOCK_COUNT),
     );
 
-    this.logger.log('last height:::     ' + lastHeight);
     let query = presetQueryLogsOfEvent(
       contractAddress,
       eventTopic0,
@@ -93,8 +93,8 @@ export class HypersyncService {
     );
 
     const bagDetails = new this.bagDetailsModel({
-      contractAddress: 'test',
-      creator: decodedLog.args[0] as string,
+      contractAddress: decodedLog.args[0] as string,
+      creator: decodedLog.args[3] as string,
       name: decodedLog.args[1] as string,
       symbol: decodedLog.args[2] as string,
       network: 8453,

@@ -62,7 +62,7 @@ export class CoingeckoService {
   //   await this.fetchTokenPlatforms();
   // }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async fetchTokenPlatforms() {
     try {
       const key = this.configService.get<string>('CG_KEY');
